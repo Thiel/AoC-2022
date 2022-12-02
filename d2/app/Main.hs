@@ -1,4 +1,6 @@
 import System.IO
+import Data.List
+import Data.Maybe
 
 data Move = Rock | Paper | Scissors
   deriving (Show, Eq)
@@ -27,7 +29,7 @@ point_shape (_, Paper) = 2
 point_shape (_, Scissors) = 3
 
 data Outcome = Win | Draw | Lose
-  deriving Show
+  deriving (Show, Eq)
 outcome :: Round -> Outcome
 outcome (Rock, Paper) = Win
 outcome (Paper, Scissors) = Win
@@ -64,13 +66,10 @@ parse2 :: [String] -> [Strategy]
 parse2 input = map fix_interpretation $ parse input
 
 my_move :: Strategy -> Move
-my_move (Rock, Win) = Paper
-my_move (Paper, Win) = Scissors
-my_move (Scissors, Win) = Rock
-my_move (a, Draw) = a
-my_move (Rock, Lose) = Scissors
-my_move (Paper, Lose) = Rock
-my_move (Scissors, Lose) = Paper
+my_move (their_move, expected_outcome) = possible_move !! idx_meet_expectation
+  where possible_move = [Rock, Paper, Scissors]
+        idx_meet_expectation = fromJust $ findIndex (==expected_outcome) $
+                               map outcome $ zip (repeat their_move) possible_move
 
 plan :: Strategy -> Round
 plan s = (fst s, my_move s)
