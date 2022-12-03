@@ -35,14 +35,14 @@ apply s = do
   c <- hGetContents h
   return $ s (lines c)
 
-type Group = ([Item], [Item], [Item])
+type Group = [[Item]]
 type Badge = Char
 
 parse2 :: [String] -> [Group]
-parse2 (x1:x2:x3:xs) = (x1, x2, x3) : parse2 xs
 parse2 [] = []
+parse2 input = take 3 input : parse2 (drop 3 input)
 
 get_badge :: Group -> Badge
-get_badge (x,y,z) = head $ intersect x $ intersect y z
+get_badge g = head $ foldr1 intersect g
 
 solve2 input = sum $ map (priority . get_badge) $ parse2 input
