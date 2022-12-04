@@ -12,6 +12,7 @@ common warnings
 executable d4
     main-is:          Main.hs
     build-depends:    base ^>=4.16.3.0,
+                      parsec >= 3.1.15.1,
                       split >= 0.2.3.5,
                       split >= 0.2.3.5,
                       text >= 1.2.5.0,

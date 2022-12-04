@@ -1,6 +1,8 @@
 import Data.List.Split
 import Data.List
 import System.IO
+import Text.Parsec
+import Data.Either
 
 sample = [
   "2-4,6-8",
@@ -14,10 +16,20 @@ sample = [
 type Section = (Int, Int)
 type Assignment = (Section, Section)
 
-parse :: [String] -> [Assignment]
-parse input = map (\(w:x:y:z:[]) -> ((w,x),(y,z)))
-              $ map (map read)
-              $ map (splitWhen (\x->x=='-' || x == ',')) input
+parse_entry :: Parsec String st Assignment
+parse_entry = do
+  x1 <- read <$> many1 digit
+  char '-'
+  y1 <- read <$> many1 digit
+  char ','
+  x2 <- read <$> many1 digit
+  char '-'
+  y2 <- read <$> many1 digit
+  return ((x1,y1),(x2,y2))
+
+parse_input :: [String] -> [Assignment]
+parse_input i = rights $ map (parse parse_entry "") i
+
 
 overlap_fully :: Assignment -> Bool
 overlap_fully ((x1,y1),(x2,y2)) | x1 >= x2 && y1 <= y2 = True
@@ -25,7 +37,7 @@ overlap_fully ((x1,y1),(x2,y2)) | x1 >= x2 && y1 <= y2 = True
                                 | otherwise = False
 
 solve :: [String] -> Int
-solve input = sum $ map (fromEnum . overlap_fully) $ parse input
+solve input = sum $ map (fromEnum . overlap_fully) $ parse_input input
 
 apply :: ([String] -> Int) -> IO Int
 apply s = do
@@ -37,4 +49,4 @@ overlap :: Assignment -> Bool
 overlap ((x1,y1),(x2,y2)) = intersect [x1..y1] [x2..y2] /= []
 
 solve2 :: [String] -> Int
-solve2 input = sum $ map (fromEnum . overlap) $ parse input
+solve2 input = sum $ map (fromEnum . overlap) $ parse_input input
