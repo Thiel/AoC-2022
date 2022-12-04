@@ -30,10 +30,13 @@ point_shape (_, Scissors) = 3
 
 data Outcome = Win | Draw | Lose
   deriving (Show, Eq)
+
+win_against Rock = Paper
+win_against Paper = Scissors
+win_against Scissors = Rock
+
 outcome :: Round -> Outcome
-outcome (Rock, Paper) = Win
-outcome (Paper, Scissors) = Win
-outcome (Scissors, Rock) = Win
+outcome (their, our) | win_against their == our = Win
 outcome (their, our) | their == our = Draw
 outcome _ | otherwise = Lose
 
