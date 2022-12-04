@@ -34,8 +34,7 @@ apply s = do
   return $ s (lines c)
 
 overlap :: Assignment -> Bool
-overlap ((x1,y1),(x2,y2)) | intersect [x1..y1] [x2..y2] /= [] = True
-                          | otherwise = False
+overlap ((x1,y1),(x2,y2)) = intersect [x1..y1] [x2..y2] /= []
 
 solve2 :: [String] -> Int
 solve2 input = sum $ map (fromEnum . overlap) $ parse input
