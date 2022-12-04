@@ -21,8 +21,8 @@ parse input = map (\(w:x:y:z:[]) -> ((w,x),(y,z)))
 
 overlap_fully :: Assignment -> Bool
 overlap_fully ((x1,y1),(x2,y2)) | x1 >= x2 && y1 <= y2 = True
-                          | x1 <= x2 && y1 >= y2 = True
-                          | otherwise = False
+                                | x1 <= x2 && y1 >= y2 = True
+                                | otherwise = False
 
 solve :: [String] -> Int
 solve input = sum $ map (fromEnum . overlap_fully) $ parse input
@@ -34,7 +34,7 @@ apply s = do
   return $ s (lines c)
 
 overlap :: Assignment -> Bool
-overlap ((x1,y1),(x2,y2)) | length (intersect [x1..y1] [x2..y2]) > 0 = True
+overlap ((x1,y1),(x2,y2)) | intersect [x1..y1] [x2..y2] /= [] = True
                           | otherwise = False
 
 solve2 :: [String] -> Int
