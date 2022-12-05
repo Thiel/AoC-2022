@@ -17,15 +17,17 @@ type Section = (Int, Int)
 type Assignment = (Section, Section)
 
 parse_entry :: Parsec String st Assignment
-parse_entry = do
-  x1 <- read <$> many1 digit
-  char '-'
-  y1 <- read <$> many1 digit
-  char ','
-  x2 <- read <$> many1 digit
-  char '-'
-  y2 <- read <$> many1 digit
-  return ((x1,y1),(x2,y2))
+parse_entry = let
+  number = read <$> many1 digit
+  in
+    do x1 <- number 
+       char '-'
+       y1 <- number
+       char ','
+       x2 <- number
+       char '-'
+       y2 <- number
+       return ((x1,y1),(x2,y2))
 
 parse_input :: [String] -> [Assignment]
 parse_input i = rights $ map (parse parse_entry "") i
