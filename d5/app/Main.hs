@@ -60,10 +60,6 @@ parse_input = do
 
 sample :: IO ([Stack], [Move])
 sample = fromRight ([],[]) <$> parseFromFile parse_input "sample"
--- sample :: ([Stack], [Move])
--- sample = (["NZ","DCM","P"],[(1,2,1),(3,1,3),(2,2,1),(1,1,2)])
--- stacks = fst sample
--- moves = snd sample
 
 apply_move :: Move -> [Stack] -> [Stack]
 apply_move (n,from,to) ss = ss''
