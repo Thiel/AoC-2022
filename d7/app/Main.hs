@@ -83,7 +83,7 @@ solve [] = 0
 
 filter_gt :: Int -> [FS] -> [FS]
 filter_gt freeup_space (d@(Dir _ fs):xs) | weird_dir_size d >= freeup_space = d : filter_gt freeup_space fs ++ filter_gt freeup_space xs
-                                    | otherwise = filter_gt freeup_space fs ++ filter_gt freeup_space xs
+                                         | otherwise = filter_gt freeup_space fs ++ filter_gt freeup_space xs
 filter_gt freeup_space (_:xs) = filter_gt freeup_space xs
 filter_gt _ [] = []
 
