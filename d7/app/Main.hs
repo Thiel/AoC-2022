@@ -39,7 +39,7 @@ parse_cd_in = do
   ss <- many1 letter <|> string "/"
   newline
   fs <- parse_ls
-  nested_dirs <- many (try parse_cd_in) <|> return []
+  nested_dirs <- many (try parse_cd_in)
   try parse_cd_out <|> return ()
   return $ [Dir ss (fs++concat nested_dirs)]
 
