@@ -73,8 +73,6 @@ weird_dir_size :: FS -> Int
 weird_dir_size (File _ s) = s
 weird_dir_size (Dir _ f_or_d) = sum $ map weird_dir_size f_or_d
 
-parse_sample = [Dir "/" [File "b.txt" 14848514,File "c.dat" 8504156,Dir "a" [File "f" 29116,File "g" 2557,File "h.lst" 62596,Dir "e" [File "i" 584]],Dir "d" [File "j" 4060174,File "d.log" 8033020,File "d.ext" 5626152,File "k" 7214296]]]
-
 solve :: [FS] -> Int
 solve (d@(Dir _ fs):xs) | weird_dir_size d <= 100000 = weird_dir_size d + solve fs + solve xs
                         | otherwise = solve fs + solve xs
