@@ -50,12 +50,6 @@ input = do
   c <- hGetContents h
   return (lines c)
 
--- m@((w,h),ts) = parse sample
--- x :: Int
--- x = 0
--- y :: Int
--- y = 0
-
 viewing_distance :: Map -> Dir -> Tree -> Int
 viewing_distance m d t@(_,h) = min (distance_to_edge m d t) (1 + length viewable_l)
   where heights = filter (>=0) $ neigh_height d m t
