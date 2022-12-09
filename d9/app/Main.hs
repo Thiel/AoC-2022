@@ -30,45 +30,46 @@ str2dir "D" = D
 str2dir "L" = L
 str2dir "R" = R
 
-type BoardState = (Pos, Pos, [Move])
+type BoardState = ([Pos], [Move])
 apply_move_head :: State BoardState ()
 apply_move_head = do
-  ((x,y), t, ms) <- get
-  case ms of
-    (_,0):ms' -> do
-      put ((x,y), t, ms')
+  (ps, ms) <- get
+  case (ps,ms) of
+    ((x,y):ts,(_,0):ms') -> do
+      put ((x,y):ts, ms')
       apply_move_head
-    (U,l):ms' -> put ((x,y+1), t, (U,l-1):ms')
-    (D,l):ms' -> put ((x,y-1), t, (D,l-1):ms')
-    (R,l):ms' -> put ((x+1,y), t, (R,l-1):ms')
-    (L,l):ms' -> put ((x-1,y), t, (L,l-1):ms')
-    [] -> return ()
+    ((x,y):ts,(U,l):ms') -> put ((x,y+1):ts, (U,l-1):ms')
+    ((x,y):ts,(D,l):ms') -> put ((x,y-1):ts, (D,l-1):ms')
+    ((x,y):ts,(R,l):ms') -> put ((x+1,y):ts, (R,l-1):ms')
+    ((x,y):ts,(L,l):ms') -> put ((x-1,y):ts, (L,l-1):ms')
+    (_,[]) -> return ()
 --  get >>= traceShowM
   return ()
 
 get_tail_pos :: State BoardState Pos
 get_tail_pos = do
-  (_,t,_) <- get
-  return t
+  (ts,_) <- get
+  return $ last ts
 
 update_tail :: State BoardState ()
 update_tail = do
-  (h, t, ms) <- get
-  put (h, new_tail_pos h t, ms)
+  (ts, ms) <- get
+  put (new_tail_pos ts, ms)
   return ()
 
-new_tail_pos :: Pos -> Pos -> Pos
-new_tail_pos h@(hx,hy) t@(tx,ty) | hx == tx && abs(hy - ty) >= 2 = (tx, ty + signum (hy - ty))
-                                 | hy == ty && abs(hx - tx) >= 2 = (tx + signum (hx - tx), ty)
-                                 | dist h t >= 3 = (tx + signum (hx - tx), ty + signum (hy - ty))
-                                 | otherwise = t
-
+new_tail_pos :: [Pos] -> [Pos]
+new_tail_pos (h@(hx,hy):t@(tx,ty):ts) | hx == tx && abs(hy - ty) >= 2 = h : (new_tail_pos $ (tx, ty + signum (hy - ty)):ts)
+                                      | hy == ty && abs(hx - tx) >= 2 = h : (new_tail_pos $ (tx + signum (hx - tx), ty):ts)
+                                      | dist h t >= 3 = h : (new_tail_pos $ (tx + signum (hx - tx), ty + signum (hy - ty)):ts)
+                                      | otherwise = h : (new_tail_pos $ t:ts)
+new_tail_pos (x:[]) = [x]
+new_tail_pos [] = []
 dist :: Pos -> Pos -> Int
 dist (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
 
 is_done :: State BoardState Bool
 is_done = do
-  (_,_,ms) <- get
+  (_,ms) <- get
   return (ms == [])
 
 resolve_tail_pos :: State BoardState [Pos]
@@ -97,7 +98,34 @@ input = do
 solve_input :: IO Int
 solve_input = do
   i <- input
-  return $ evalState solve ((0,0), (0,0), parse i)
+  return $ evalState solve ([(0,0), (0,0)], parse i)
+
+---
+
+sample2 = [
+  "R 4",
+  "U 4",
+  "L 3",
+  "D 1",
+  "R 4",
+  "D 1",
+  "L 5",
+  "R 2"]
+
+sample3 = [
+  "R 5",
+  "U 8",
+  "L 8",
+  "D 3",
+  "R 17",
+  "D 10",
+  "L 25",
+  "U 20"]
 
 start_state :: BoardState
-start_state = ((0,0), (0,0), parse sample)
+start_state = (take 10 $ repeat (0,0), parse sample3)
+
+solve2_input :: IO Int
+solve2_input = do
+  i <- input
+  return $ evalState solve (take 10 $ repeat (0,0), parse i)
