@@ -153,13 +153,12 @@ sample = [
 data Ops = Add Int | Noop
   deriving Show
 
-command2ops :: String -> [Ops]
-command2ops "noop" = [Noop]
-command2ops s | "addx" `isPrefixOf` s  = [Add $ read $ words s !! 1]
-
+parse :: [String] -> [Ops]
 parse input = do
   entry <- input
-  command2ops entry
+  case entry of
+    "noop" -> [Noop]
+    s | "addx" `isPrefixOf` s -> [Add $ read $ words s !! 1]
 
 command2cycle_update :: Ops -> [Int]
 command2cycle_update Noop = [0]
@@ -183,13 +182,15 @@ solve input = sum $ take 6 $ signal_strength $ parse input
 
 type Cycle = Int
 pixelpos :: Cycle -> Signal -> [Int]
-pixelpos cycle s = [middle - 1, middle, middle + 1]
-  where middle = s !! (cycle - 1)
+pixelpos cycle s = do
+  i <- [-1..1]
+  [i+middle]
+  where
+    middle = s !! (cycle - 1)
 
 type Screen = [String]
 render :: Signal -> Screen
-render signal = chunksOf 40 (do
-                                cycle <- [1..240]
+render signal = chunksOf 40 (do cycle <- [1..240]
                                 let crt_pos = cycle - 1 in
                                   if (crt_pos `mod` 40) `elem` pixelpos cycle signal then
                                     ['#']
