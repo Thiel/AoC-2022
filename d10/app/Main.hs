@@ -175,7 +175,7 @@ input = do
   return $ lines c
 
 signal_strength :: [Ops] -> [Int]
-signal_strength ops = zipWith (*) ([20+i*40 | i <-[ 0..]]) $ map head $ chunksOf 40 $ drop 19 $ signal ops
+signal_strength ops = zipWith (*) [20,60..] $ map head $ chunksOf 40 $ drop 19 $ signal ops
 
 solve :: [String] -> Int
 solve input = sum $ take 6 $ signal_strength $ parse input
