@@ -198,4 +198,4 @@ render signal = chunksOf 40 (do cycle <- [1..240]
                                     ['.'])
 
 solve2 :: [String] -> IO ()
-solve2 input = mapM_ putStrLn $ render (signal $ parse input)
+solve2 input = mapM_ print $ render (signal $ parse input)
