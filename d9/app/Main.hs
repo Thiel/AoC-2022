@@ -123,9 +123,9 @@ sample3 = [
   "U 20"]
 
 start_state :: BoardState
-start_state = (take 10 $ repeat (0,0), parse sample3)
+start_state = (replicate 10 (0,0), parse sample3)
 
 solve2_input :: IO Int
 solve2_input = do
   i <- input
-  return $ evalState solve (take 10 $ repeat (0,0), parse i)
+  return $ evalState solve (replicate 10 (0,0), parse i)
