@@ -1,8 +1,9 @@
-import Data.Tuple
+import Algorithm.Search
 import Data.Maybe
+import Data.Tuple
 import Data.Char
-import Data.List
 import System.IO
+import Debug.Trace
 
 sample = [
   "Sabqponm",
@@ -13,10 +14,8 @@ sample = [
 
 type Elevation = Char
 type Pos = (Int, Int)
-type Map = [(Pos, Elevation)]
-
-data Move = U | D | L | R
-  deriving Show
+type MapElt = (Pos, Elevation)
+type Map = [MapElt]
 
 parse :: [String] -> Map
 parse input = do
@@ -24,16 +23,21 @@ parse input = do
   x <- [0 .. (length.head) input - 1]
   return ((x,y), input !! y !! x)
 
-s = parse sample
+neighbors :: Map -> Pos -> [Pos]
+neighbors m (x,y) = filter is_valid $ filter (\p -> isJust $ lookup p m)  [(x,y+1), (x,y-1), (x+1,y), (x-1,y)]
+  where is_valid pos = cost m (x,y) pos == 1
 
-get_start_pos :: Map -> Pos
-get_start_pos m = fromJust $ lookup 'S' $ map swap m
+cost :: Map -> Pos -> Pos -> Float
+cost m from_pos to_pos = if ord from_elevation + 1 >= ord to_elevation then
+                           1
+                         else
+                           10000000
+  where from_elevation = get_elevation m from_pos
+        to_elevation = get_elevation m to_pos
 
-get_end_pos :: Map -> Pos
-get_end_pos m = fromJust $ lookup 'E' $ map swap m
-
-s_pos = get_start_pos s
-e_pos = get_end_pos s
+reverse_cost m from_pos to_pos = cost m to_pos from_pos
+reverse_neighbors m (x,y) = filter is_valid $ filter (\p -> isJust $ lookup p m)  [(x,y+1), (x,y-1), (x+1,y), (x-1,y)]
+  where is_valid pos = reverse_cost m (x,y) pos == 1
 
 get_elevation :: Map -> Pos -> Elevation
 get_elevation m pos = case maybe_e of
@@ -43,49 +47,34 @@ get_elevation m pos = case maybe_e of
                         Just e -> e
   where maybe_e = lookup pos m
 
-pos_after_move :: Pos -> Move -> Pos
-pos_after_move (x,y) U = (x,y-1)
-pos_after_move (x,y) D = (x,y+1)
-pos_after_move (x,y) L = (x-1,y)
-pos_after_move (x,y) R = (x+1,y)
 
-all_dirs :: [Move]
-all_dirs = [U, D, L, R]
+get_start_pos :: Map -> Pos
+get_start_pos m = fromJust $ lookup 'S' $ map swap m
 
-is_valid_move :: Map -> Pos -> Move -> Bool
-is_valid_move m pos mv = ord after_e <= ord before_e + 1
-  where before_e = get_elevation m pos
-        after_e = get_elevation m (pos_after_move pos mv)
+get_end_pos :: Map -> Pos
+get_end_pos m = fromJust $ lookup 'E' $ map swap m
 
-neighbors :: Pos -> [Pos]
-neighbors p = map (pos_after_move p) [U, D, L, R]
-
-paths :: Map -> Pos -> Pos -> [Pos] -> [[Pos]]
-paths _ start stop _ | start == stop = [[start]]
-paths m start stop visited = map (start:) $ concat $ map (\new_pos -> paths m new_pos stop (start:visited)) not_visited_poss
-  where valid_move = filter (is_valid_move m start) all_dirs
-        not_visited_poss = map (pos_after_move start) valid_move \\ visited
-
-get_move :: Pos -> Pos -> Move
-get_move from to = fromJust $ lookup to neigh
-  where neigh = zip (map (pos_after_move from) all_dirs) all_dirs
-
-ps =  paths s s_pos e_pos []
-shortest_path = fromJust $ lookup 26 $ zip (map length $ ps ) ps
-
-solve input = (minimum $ map length $ paths m start stop []) - 1
+solve input start = trace ("Sloving " ++ show start) $ length $ fromJust $ snd <$> dijkstra neighbors' cost' (==get_end_pos m) start
   where m = parse input
-        start = get_start_pos m
-        stop = get_end_pos m
-
+        neighbors' = neighbors m
+        cost' = cost m
 
 input :: IO [String]
 input = do
   h <- openFile "input" ReadMode
   c <- hGetContents h
   return (lines c)
+s = parse sample
 
-main :: IO ()
+possible_starts :: Map -> [Pos]
+possible_starts m = map fst $ filter (\(_,e) -> e=='a' || e=='S') m
+
+solve2 input = dijkstra neighbors' cost' (\x -> get_elevation m x == 'a') (get_end_pos m)
+  --length $ fromJust $ snd <$>
+  where m = parse input
+        neighbors' = reverse_neighbors m
+        cost' = reverse_cost m
+
 main = do
   i <- input
-  print $ solve i
+  print $ solve2 i
