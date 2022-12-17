@@ -65,10 +65,10 @@ solve input = sum [ idx | (idx, ord) <- zip [1..] pair_ord, ord]
         pair_ord = map (\(a,b) -> a <= b) i
 
 instance Ord Packet where
-  (Integer a) `compare` (Integer b) = a `compare` b
-  as@(List _) `compare` b@(Integer _) = as `compare` (List [b])
-  a@(Integer _) `compare` bs@(List _) = List [a] `compare` bs
-  (List as) `compare` (List bs) = as `compare` bs
+  Integer a `compare` Integer b = a `compare` b
+  as@List{} `compare` b@Integer{} = as `compare` (List [b])
+  a@Integer{} `compare` bs@List{} = List [a] `compare` bs
+  List as `compare` List bs = as `compare` bs
 
 instance Show Packet where
   show (Integer a) = show a
