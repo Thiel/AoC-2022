@@ -2,6 +2,7 @@ import Text.Parsec
 import Text.Parsec.Number
 import System.IO
 import Debug.Trace
+import Data.List
 
 sample = unlines [
   "[1,1,3,1,1]",
@@ -64,7 +65,6 @@ solve input = sum [ idx | (idx, ord) <- zip [1..] pair_ord, ord]
         pair_ord = map (\(a,b) -> a <= b) i
 
 instance Ord Packet where
-  -- (<=)
   (Integer a) `compare` (Integer b) = a `compare` b
   as@(List _) `compare` b@(Integer _) = as `compare` (List [b])
   a@(Integer _) `compare` bs@(List _) = List [a] `compare` bs
@@ -85,3 +85,14 @@ debug input = unlines $ map custom_show $ zip i pair_ord
 
 custom_show ((l,r), i) = show l ++ "\n" ++ show r ++ "\n" ++ show i ++ "\n"
 
+divider_packet :: [Packet]
+divider_packet = [List [List [Integer 2]], List [List [Integer 6]]]
+
+flatten_input :: [(Packet, Packet)] -> [Packet]
+flatten_input i = map fst i ++ map snd i
+
+Right s = parse parse_problem "" sample
+
+solve2 :: String -> Int
+solve2 input = product $ map fst $ filter (snd) $ zip [1..] $ map (\x -> x `elem` divider_packet) $ sort $ flatten_input i ++ divider_packet
+  where Right i = parse parse_problem "" input
